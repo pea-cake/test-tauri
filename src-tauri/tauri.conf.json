@@ -14,10 +14,10 @@
     "windows": [
       {
         "label": "main",
-        "title": "tauri-webview-app",
+        "title": "国医云诊",
         "width": 1440,
         "height": 900,
-		"url": "https://baidu.com"
+		    "url": "https://hospital.guizhizhongyi.com"
       }
     ],
     "security": {
