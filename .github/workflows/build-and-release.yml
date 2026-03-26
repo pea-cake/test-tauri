@@ -22,9 +22,14 @@ jobs:
             artifact_name: tauri-windows-exe
             artifact_path: src-tauri/target/release/bundle/nsis/*.exe
           - name: macos
-            os: macos-latest
+            os: macos-15
             bundle: app
-            artifact_name: tauri-macos-app
+            artifact_name: tauri-macos-app-arm64
+            artifact_path: src-tauri/target/release/bundle/macos/*.app
+          - name: macos-intel
+            os: macos-15-intel
+            bundle: app
+            artifact_name: tauri-macos-app-intel
             artifact_path: src-tauri/target/release/bundle/macos/*.app
 
     steps:
@@ -74,11 +79,17 @@ jobs:
           name: tauri-windows-exe
           path: artifacts/windows
 
-      - name: Download macOS artifact
+      - name: Download macOS arm64 artifact
         uses: actions/download-artifact@v4
         with:
-          name: tauri-macos-app
-          path: artifacts/macos
+          name: tauri-macos-app-arm64
+          path: artifacts/macos-arm64
+
+      - name: Download macOS intel artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: tauri-macos-app-intel
+          path: artifacts/macos-intel
 
       - name: Prepare release files
         shell: bash
@@ -87,13 +98,18 @@ jobs:
           WIN_EXE="$(find artifacts/windows -name '*.exe' | head -n 1)"
           cp "$WIN_EXE" tauri-windows-installer.exe
 
-          cd artifacts/macos
-          MAC_APP="$(find . -maxdepth 1 -name '*.app' | head -n 1)"
-          zip -r ../../tauri-macos-app.zip "$MAC_APP"
+          cd artifacts/macos-arm64
+          MAC_APP_ARM64="$(find . -maxdepth 1 -name '*.app' | head -n 1)"
+          zip -r ../../tauri-macos-app-arm64.zip "$MAC_APP_ARM64"
+
+          cd ../macos-intel
+          MAC_APP_INTEL="$(find . -maxdepth 1 -name '*.app' | head -n 1)"
+          zip -r ../../tauri-macos-app-intel.zip "$MAC_APP_INTEL"
 
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           files: |
             tauri-windows-installer.exe
-            tauri-macos-app.zip
+            tauri-macos-app-arm64.zip
+            tauri-macos-app-intel.zip
